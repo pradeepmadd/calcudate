@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Date & Time — Helmsdeep</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #111114;
+      --elevated: #19191e;
+      --inset: #0c0c0f;
+      --fg: #f1eee6;
+      --muted: #9a958c;
+      --faint: #6d6962;
+      --accent: #d4d8e0;
+      --add: #8faf86;
+      --sub: #c98989;
+      --panel-shadow: 0 0 0 1px rgb(255 255 255 / 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Barlow", "Segoe UI", system-ui, sans-serif;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+    header {
+      box-shadow: 0 1px 0 rgb(255 255 255 / 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 16px 20px;
+    }
+    header .brand { font-family: "Barlow Condensed", sans-serif; font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+    header h1 { font-family: "Barlow Condensed", sans-serif; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; margin: 2px 0 0; }
+    header .clock { text-align: right; }
+    header .clock .d { font-size: 12px; color: var(--muted); margin: 0; }
+    header .clock .t { font-family: "IBM Plex Mono", monospace; font-size: 14px; margin: 0; }
+
+    .wrap { max-width: 480px; margin: 0 auto; padding: 24px 16px 40px; display: flex; flex-direction: column; gap: 16px; }
+
+    .panel { background: var(--surface); border-radius: 16px; padding: 8px; box-shadow: var(--panel-shadow); }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; background: var(--inset); border-radius: 12px; padding: 4px; }
+    .tabs a { display: flex; align-items: center; justify-content: center; gap: 6px; height: 44px; border-radius: 8px; color: var(--muted); font-size: 14px; font-weight: 500; text-decoration: none; }
+    .tabs a.active { background: var(--elevated); color: var(--fg); box-shadow: var(--panel-shadow); }
+
+    .body-card { margin-top: 8px; background: var(--elevated); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 20px; }
+    .row-head { display: flex; align-items: center; justify-content: space-between; }
+    .row-head p { font-size: 14px; font-weight: 500; margin: 0; }
+    .today-btn { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; padding: 4px 8px; }
+    .today-btn:hover { color: var(--fg); }
+
+    .strip { display: flex; gap: 8px; }
+    .cell { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .cell span { font-size: 11px; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); padding: 0 4px 6px; }
+    .cell select {
+      appearance: none; background: var(--inset); box-shadow: var(--panel-shadow); border: 0; color: var(--fg);
+      font-family: "IBM Plex Mono", monospace; font-size: 15px; width: 100%; min-height: 44px; padding: 8px 10px;
+      border-radius: 8px; cursor: pointer;
+    }
+
+    .op-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; background: var(--inset); box-shadow: var(--panel-shadow); border-radius: 8px; padding: 4px; }
+    .op-toggle input { display: none; }
+    .op-toggle label { display: flex; align-items: center; justify-content: center; height: 40px; border-radius: 6px; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; }
+    .op-toggle input:checked + label.add { background: rgb(143 175 134 / 0.2); color: var(--add); }
+    .op-toggle input:checked + label.sub { background: rgb(201 137 137 / 0.2); color: var(--sub); }
+
+    .steppers { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .stepper { min-width: 0; }
+    .stepper span { font-size: 11px; font-weight: 500; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); display: block; padding: 0 4px 6px; }
+    .stepper-input { display: flex; align-items: center; gap: 1px; background: var(--inset); box-shadow: var(--panel-shadow); border-radius: 8px; }
+    .stepper-input button { flex-shrink: 0; width: 40px; height: 44px; border: none; background: none; color: var(--muted); font-size: 16px; cursor: pointer; }
+    .stepper-input button:hover { color: var(--fg); }
+    .stepper-input input { flex: 1; min-width: 0; width: 100%; background: none; border: none; text-align: center; font-family: "IBM Plex Mono", monospace; font-size: 16px; color: var(--fg); }
+    .stepper-input input:focus { outline: none; }
+
+    .result-card { background: var(--surface); border-radius: 12px; padding: 20px; box-shadow: var(--panel-shadow); }
+    .result-card .label { font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+    .result-card .headline { font-family: "IBM Plex Mono", monospace; font-size: 26px; font-weight: 500; margin: 0; }
+    .result-card .detail { font-size: 14px; color: var(--muted); margin: 8px 0 0; }
+
+    .submit-row { margin-top: -8px; }
+    button.calc { width: 100%; height: 44px; border: none; border-radius: 8px; background: var(--accent); color: #0c0c0e; font-weight: 600; font-size: 14px; cursor: pointer; }
+    button.calc:hover { opacity: 0.9; }
+
+    footer { text-align: center; font-size: 12px; color: var(--faint); margin-top: 8px; }
+
+    .history-card { background: var(--surface); border-radius: 12px; padding: 16px 20px; box-shadow: var(--panel-shadow); display: none; flex-direction: column; gap: 4px; }
+    .history-card.visible { display: flex; }
+    .history-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .history-head p { font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); margin: 0; }
+    .history-clear { background: none; border: none; color: var(--muted); font-size: 12px; cursor: pointer; padding: 2px 4px; }
+    .history-clear:hover { color: var(--fg); }
+    .history-item { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 6px 0; }
+    .history-item + .history-item { box-shadow: 0 -1px 0 rgb(255 255 255 / 0.06); }
+    .history-item .h-label { font-size: 13px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .history-item .h-result { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--fg); flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  {% macro stepper(name, val) -%}
+  <div class="stepper-input">
+    <button type="button" onclick="bump('{{ name }}', -1)">−</button>
+    <input type="text" inputmode="numeric" name="{{ name }}" value="{{ val }}" />
+    <button type="button" onclick="bump('{{ name }}', 1)">+</button>
+  </div>
+  {%- endmacro %}
+  <header>
+    <div>
+      <p class="brand">Helmsdeep</p>
+      <h1>Date &amp; Time</h1>
+    </div>
+    <div class="clock">
+      <p class="d">{{ now_display_date }}</p>
+      <p class="t">{{ now_display_time }}</p>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <section class="panel">
+      <div class="tabs" role="tablist">
+        <a href="#" class="{{ 'active' if active_tab == 'date' }}" onclick="showTab(event,'date')">📅 Date</a>
+        <a href="#" class="{{ 'active' if active_tab == 'time' }}" onclick="showTab(event,'time')">⏱ Time</a>
+        <a href="#" class="{{ 'active' if active_tab == 'diff' }}" onclick="showTab(event,'diff')">🗓 Span</a>
+      </div>
+
+      <form method="post" id="date-form" class="body-card" style="{{ '' if active_tab == 'date' else 'display:none' }}">
+        <input type="hidden" name="active_tab" value="date" />
+        <div class="row-head"><p>Base date</p></div>
+        <div class="strip">
+          <div class="cell"><span>Year</span><select name="base_year">{% for y in years %}<option value="{{ y }}" {{ 'selected' if y == base_year }}>{{ y }}</option>{% endfor %}</select></div>
+          <div class="cell"><span>Month</span><select name="base_month">{% for m in range(1,13) %}<option value="{{ '%02d'|format(m) }}" {{ 'selected' if m == base_month }}>{{ '%02d'|format(m) }}</option>{% endfor %}</select></div>
+          <div class="cell"><span>Day</span><select name="base_day">{% for d in range(1,32) %}<option value="{{ '%02d'|format(d) }}" {{ 'selected' if d == base_day }}>{{ '%02d'|format(d) }}</option>{% endfor %}</select></div>
+        </div>
+        <div class="op-toggle">
+          <input type="radio" id="date-add" name="operation" value="add" checked><label class="add" for="date-add">Add</label>
+          <input type="radio" id="date-sub" name="operation" value="subtract"><label class="sub" for="date-sub">Subtract</label>
+        </div>
+        <div class="steppers">
+          <div class="stepper"><span>Years</span>{{ stepper('years', 0) }}</div>
+          <div class="stepper"><span>Months</span>{{ stepper('months', 0) }}</div>
+          <div class="stepper"><span>Days</span>{{ stepper('days', 0) }}</div>
+        </div>
+        <div class="submit-row"><button class="calc" type="submit">Calculate</button></div>
+      </form>
+
+      <form method="post" id="time-form" class="body-card" style="{{ '' if active_tab == 'time' else 'display:none' }}">
+        <input type="hidden" name="active_tab" value="time" />
+        <div class="row-head"><p>Base time</p></div>
+        <div class="strip">
+          <div class="cell"><span>Hour</span><select name="base_hour">{% for h in range(1,13) %}<option value="{{ '%02d'|format(h) }}" {{ 'selected' if h == base_hour }}>{{ '%02d'|format(h) }}</option>{% endfor %}</select></div>
+          <div class="cell"><span>Min</span><select name="base_minute">{% for m in range(60) %}<option value="{{ '%02d'|format(m) }}" {{ 'selected' if m == base_minute }}>{{ '%02d'|format(m) }}</option>{% endfor %}</select></div>
+          <div class="cell"><span>Sec</span><select name="base_second">{% for s in range(60) %}<option value="{{ '%02d'|format(s) }}" {{ 'selected' if s == base_second }}>{{ '%02d'|format(s) }}</option>{% endfor %}</select></div>
+          <div class="cell"><span>Period</span><select name="base_ampm"><option value="AM" {{ 'selected' if base_ampm=='AM' }}>AM</option><option value="PM" {{ 'selected' if base_ampm=='PM' }}>PM</option></select></div>
+        </div>
+        <div class="op-toggle">
+          <input type="radio" id="time-add" name="operation" value="add" checked><label class="add" for="time-add">Add</label>
+          <input type="radio" id="time-sub" name="operation" value="subtract"><label class="sub" for="time-sub">Subtract</label>
+        </div>
+        <div class="steppers">
+          <div class="stepper"><span>Hours</span>{{ stepper('hours', 0) }}</div>
+          <div class="stepper"><span>Minutes</span>{{ stepper('minutes', 0) }}</div>
+          <div class="stepper"><span>Seconds</span>{{ stepper('seconds', 0) }}</div>
+        </div>
+        <div class="submit-row"><button class="calc" type="submit">Calculate</button></div>
+      </form>
+
+      <form method="post" id="diff-form" class="body-card" style="{{ '' if active_tab == 'diff' else 'display:none' }}">
+        <input type="hidden" name="active_tab" value="diff" />
+        <div>
+          <div class="row-head"><p>Start</p></div>
+          <div class="strip">
+            <div class="cell"><span>Year</span><select name="start_year">{% for y in years %}<option value="{{ y }}" {{ 'selected' if y == start_year }}>{{ y }}</option>{% endfor %}</select></div>
+            <div class="cell"><span>Month</span><select name="start_month">{% for m in range(1,13) %}<option value="{{ '%02d'|format(m) }}" {{ 'selected' if m == start_month }}>{{ '%02d'|format(m) }}</option>{% endfor %}</select></div>
+            <div class="cell"><span>Day</span><select name="start_day">{% for d in range(1,32) %}<option value="{{ '%02d'|format(d) }}" {{ 'selected' if d == start_day }}>{{ '%02d'|format(d) }}</option>{% endfor %}</select></div>
+          </div>
+        </div>
+        <div>
+          <div class="row-head"><p>End</p></div>
+          <div class="strip">
+            <div class="cell"><span>Year</span><select name="end_year">{% for y in years %}<option value="{{ y }}" {{ 'selected' if y == end_year }}>{{ y }}</option>{% endfor %}</select></div>
+            <div class="cell"><span>Month</span><select name="end_month">{% for m in range(1,13) %}<option value="{{ '%02d'|format(m) }}" {{ 'selected' if m == end_month }}>{{ '%02d'|format(m) }}</option>{% endfor %}</select></div>
+            <div class="cell"><span>Day</span><select name="end_day">{% for d in range(1,32) %}<option value="{{ '%02d'|format(d) }}" {{ 'selected' if d == end_day }}>{{ '%02d'|format(d) }}</option>{% endfor %}</select></div>
+          </div>
+        </div>
+        <div class="submit-row"><button class="calc" type="submit">Calculate</button></div>
+      </form>
+    </section>
+
+    {% if result %}
+    <section class="result-card">
+      <p class="label">Result</p>
+      <p class="headline">{{ result.headline }}</p>
+      <p class="detail">{{ result.detail }}</p>
+    </section>
+    {% endif %}
+
+    <section class="history-card" id="history-card">
+      <div class="history-head">
+        <p>Recent</p>
+        <button type="button" class="history-clear" onclick="clearHistory()">Clear</button>
+      </div>
+      <div id="history-list"></div>
+    </section>
+
+    <footer>Helmsdeep · Calendar arithmetic</footer>
+  </div>
+
+  <script>
+    function showTab(e, tab) {
+      e.preventDefault();
+      document.getElementById('date-form').style.display = tab === 'date' ? '' : 'none';
+      document.getElementById('time-form').style.display = tab === 'time' ? '' : 'none';
+      document.getElementById('diff-form').style.display = tab === 'diff' ? '' : 'none';
+      document.querySelectorAll('.tabs a').forEach(a => a.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+    }
+    function bump(name, delta) {
+      const input = document.querySelector(`input[name="${name}"]`);
+      const next = Math.max(0, Math.min(999, (parseInt(input.value, 10) || 0) + delta));
+      input.value = next;
+    }
+
+    const HISTORY_KEY = 'helmsdeep-history';
+    const HISTORY_LIMIT = 5;
+
+    function loadHistory() {
+      try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveHistory(entries) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(entries));
+    }
+
+    function pushHistory(label, result) {
+      const entries = loadHistory();
+      entries.unshift({ label, result });
+      saveHistory(entries.slice(0, HISTORY_LIMIT));
+    }
+
+    function renderHistory() {
+      const entries = loadHistory();
+      const card = document.getElementById('history-card');
+      const list = document.getElementById('history-list');
+      card.classList.toggle('visible', entries.length > 0);
+      list.innerHTML = entries.map(entry => `
+        <div class="history-item">
+          <span class="h-label">${escapeHtml(entry.label)}</span>
+          <span class="h-result">${escapeHtml(entry.result)}</span>
+        </div>
+      `).join('');
+    }
+
+    function clearHistory() {
+      localStorage.removeItem(HISTORY_KEY);
+      renderHistory();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    {% if result and result.label %}
+    pushHistory({{ result.label|tojson }}, {{ result.headline|tojson }});
+    {% endif %}
+    renderHistory();
+  </script>
+</body>
+</html>
