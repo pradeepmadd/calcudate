@@ -10,9 +10,9 @@ def calculate_date():
     try:
         base_str = f"{cb_base_year.get()}-{cb_base_month.get()}-{cb_base_day.get()}"
         base_datetime = datetime.strptime(base_str, "%Y-%m-%d")
-        y = int(spin_years.get() or 0)
-        mo = int(spin_months.get() or 0)
-        d = int(spin_days.get() or 0)
+        y = abs(int(spin_years.get() or 0))
+        mo = abs(int(spin_months.get() or 0))
+        d = abs(int(spin_days.get() or 0))
         sign = 1 if date_operation_var.get() == "Add" else -1
         delta = relativedelta(years=sign * y, months=sign * mo, days=sign * d)
         new_date = base_datetime + delta
@@ -24,9 +24,9 @@ def calculate_time():
     try:
         base_str = f"{cb_hour.get()}:{cb_minute.get()}:{cb_second.get()} {cb_ampm.get()}"
         base_time = datetime.strptime(base_str, "%I:%M:%S %p")
-        h = int(spin_hours.get() or 0)
-        m = int(spin_minutes.get() or 0)
-        s = int(spin_seconds.get() or 0)
+        h = abs(int(spin_hours.get() or 0))
+        m = abs(int(spin_minutes.get() or 0))
+        s = abs(int(spin_seconds.get() or 0))
         sign = 1 if time_operation_var.get() == "Add" else -1
         delta = relativedelta(hours=sign * h, minutes=sign * m, seconds=sign * s)
         new_time = base_time + delta

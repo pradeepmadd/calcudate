@@ -3,7 +3,7 @@
 
 a = Analysis(
     ['calculator_pro.py'],
-    pathex=[],
+    pathex=['..'],
     binaries=[],
     datas=[],
     hiddenimports=[],
